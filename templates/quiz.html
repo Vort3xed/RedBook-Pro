@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Quiz</title>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.1/flowbite.min.css"
+            rel="stylesheet" />
+    </head>
+
+    <header>
+        {% include 'nav.html' %}
+    </header>
+
+    <body>
+        <h1>Quiz</h1>
+        <p>Welcome to the dashboard!</p>
+        <p>sign out</p>
+
+        <img src="{{ url_for('get_image', image_name=image_name) }}" alt="Image">
+
+
+        <form action="/logout" method="post">
+            <input type="submit" value="Sign out">
+        </form>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    </body>
+</html>

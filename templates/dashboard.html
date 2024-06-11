@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.1/flowbite.min.css"
+            rel="stylesheet" />
+
+        <style>
+                .hidden {
+                    display: none;
+                }
+            </style>
+    </head>
+
+    <header>
+        {% include 'nav.html' %}
+    </header>
+
+    <body>
+        <h1>Dashboard</h1>
+        <p>Welcome to the dashboard!</p>
+
+        <form action="/setQuizParams" method="post" class="max-w-sm mx-auto">
+            <label for="testselect"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                Test</label>
+            <select id="testselect" name="testselect"
+                class="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option selected>Choose a test</option>
+                <option value="RD">Reading/Writing</option>
+                <option value="MH">Math</option>
+            </select>
+            <label for="difficultyselect"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                Difficulty</label>
+            <select id="difficultyselect" name="difficultyselect"
+                class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option selected>Choose a difficulty</option>
+                <option value="E">Easy</option>
+                <option value="M">Medium</option>
+                <option value="H">Hard</option>
+            </select>
+            <div id="readingSkills">
+                <label for="skillselectreading"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                Specific Skill</label>
+            <select id="skillselectreading" name="readingskill"
+                class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option selected>Choose a skill</option>
+                <option value="E">Central Ideas and Details</option>
+                <option value="M">Command of Evidence</option>
+                <option value="H">Words in Context</option>
+                <option value="H">Text Structure and Purpose</option>
+                <option value="H">Cross-Text Connections</option>
+                <option value="H">Rhetorical Synthesis</option>
+                <option value="H">Transitions</option>
+                <option value="H">Boundaries</option>
+                <option value="H">Form, Structure, and Sense</option>
+            </select>
+            </div>
+            <div id="mathSkills" class="hidden">
+                <label for="skillselectmath"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                    Specific Skill</label>
+                <select id="skillselectmath" name="mathskill"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option selected>Choose a skill</option>
+                    <option value="A">Algebra</option>
+                    <option value="G">Geometry</option>
+                    <option value="T">Trigonometry</option>
+                    <option value="S">Statistics</option>
+                    <option value="P">Probability</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Start Quiz"
+                class="block w-full p-2 mt-6 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-blue-600 dark:focus:ring-offset-2">
+
+        </form>
+
+        <a href="/quiz">go to quiz</a>
+        <a href="/stats">go to stats</a>
+        <form action="/logout" method="post">
+            <input type="submit" value="Sign out">
+        </form>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+        <script>
+    document.getElementById('testselect').addEventListener('change', function () {
+        var readingSkills = document.getElementById('readingSkills');
+        var mathSkills = document.getElementById('mathSkills');
+        if (this.value === 'RD') {
+            readingSkills.classList.remove('hidden');
+            mathSkills.classList.add('hidden');
+        } else if (this.value === 'MH') {
+            mathSkills.classList.remove('hidden');
+            readingSkills.classList.add('hidden');
+        } else {
+            readingSkills.classList.add('hidden');
+            mathSkills.classList.add('hidden');
+        }
+    });
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home</title>
+
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.1/flowbite.min.css"
+            rel="stylesheet" />
+    </head>
+
+    <header>
+        {% include 'nav.html' %}
+    </header>
+
+    <body>
+        <h1>RedBook</h1>
+        <p>Welcome to the home page!</p>
+        <p>Sign in!</p>
+        <form action="/" method="post">
+            <input type="email" name="email" placeholder="Email" required>
+            <br>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="submit" value="Sign in">
+        </form>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    </body>
+</html>
