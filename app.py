@@ -2,11 +2,13 @@ from flask import Flask, session, render_template, request, redirect, url_for, s
 import firebase_admin
 from firebase_admin import credentials, auth, firestore, storage
 from dotenv import load_dotenv
-import pyrebase
+import requests
 import os
 import io
 
 app = Flask(__name__)
+
+load_dotenv()
 
 config = {
     'apiKey': os.getenv('APIKEY'),
@@ -19,16 +21,12 @@ config = {
     'databaseURL': os.getenv('DATABASE_URL')
 }
 
-# init basic app
-firebase = pyrebase.initialize_app(config)
-
-auth = firebase.auth()
-
 # DO NOT UNCOMMENT, "storage" variable should not be overwritten
 # storage = firebase.storage()
 
 # set credientials for firebase admin
 cred = credentials.Certificate('redbook-910e9-firebase-adminsdk-hzs4e-a467f4cf29.json')
+# firebase_admin.initialize_app(cred)
 
 # setup firebase admin for image storage
 firebase_admin.initialize_app(cred, {
@@ -64,14 +62,22 @@ def home():
         password = request.form['password']
 
         try:
-            # try to sign in using the credentials provided
-            user = auth.sign_in_with_email_and_password(email, password)
+            # try to sign in using the credentials provided (OLD METHOD WITH PYREBASE)
+            # user = auth.sign_in_with_email_and_password(email, password)
+
+            user = sign_in_with_email_password(email, password)
             # if it works, set the session variables and go to dashboard
             session['is_logged_in'] = True
+            print("session is set to active")
             session['email'] = user['email']
-            session['uid'] = user['idToken']
+            print("email is retrieved")
+            session['uid'] = user['localId']
+            print("uid is retrieved")
+
+            print("success! uid -> " + str(session['uid']))
             return redirect(url_for('dashboard'))
         except Exception as e:
+            print("this is the exception: " + str(e))
             # womp womp sign in failed or credentials are wrong
             return render_template('home.html')
     return render_template('home.html')
@@ -107,11 +113,36 @@ def get_image(image_name):
 
 def fetch_image(image_name):
     bucket = storage.bucket()
-    print("connected to bucket")
     blob = bucket.blob(image_name)
-    print("retrieved blob")
     image_data = blob.download_as_bytes()
     return io.BytesIO(image_data)
+
+def sign_up_with_email_password(email, password):
+    try:
+        user = auth.create_user(email=email, password=password)
+        print('Successfully created new user:', user.uid)
+        return user.uid
+    except Exception as e:
+        print('Error creating new user:', e)
+        return None
+
+def sign_in_with_email_password(email, password):
+    """Sign in existing user with email and password."""
+    url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + os.getenv('APIKEY')
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        data = response.json()
+        # print('Successfully signed in user:', data['localId'])
+        # print('ID Token:', data['idToken'])
+        return data
+    else:
+        print('Failed to sign in:', response.json())
+        return None
 
 @app.context_processor
 def import_session():

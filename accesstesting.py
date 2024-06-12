@@ -18,6 +18,9 @@ config = {
 
 cred = credentials.Certificate('redbook-910e9-firebase-adminsdk-hzs4e-a467f4cf29.json')
 firebase_admin.initialize_app(cred)
+# firebase = pyrebase.initialize_app(config)
+
+
 
 # firebase_admin.initialize_app(cred, {
 #     'storageBucket': 'redbook-910e9.appspot.com'
@@ -41,8 +44,8 @@ firebase_admin.initialize_app(cred)
 # print(info)
 db = firestore.client()
 
-# document_id = 'VaQIZzpBplPRuHV9KQzW8kJDJ2f2'
-document_id = 'test'
+document_id = 'VaQIZzpBplPRuHV9KQzW8kJDJ2f2'
+# document_id = 'test'
 
 # Get the document with the specific ID from the accounts collection
 doc = db.collection('accounts').document(document_id).get()
@@ -52,3 +55,5 @@ doc = db.collection('accounts').document(document_id).get()
 # document_data_json = json.dumps(doc.val(), indent=4)
 # print(f'Document Data (JSON):\n{document_data_json}')
 print(doc.to_dict())
+
+
