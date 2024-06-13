@@ -3,6 +3,9 @@ from firebase_admin import credentials, firestore, initialize_app
 import firebase_admin
 import json
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 config = {
     'apiKey': os.getenv('APIKEY'),
@@ -16,15 +19,15 @@ config = {
 }
 
 
-cred = credentials.Certificate('redbook-910e9-firebase-adminsdk-hzs4e-a467f4cf29.json')
-firebase_admin.initialize_app(cred)
+cred = credentials.Certificate(os.getenv('CERT_PATH'))
+# firebase_admin.initialize_app(cred)
 # firebase = pyrebase.initialize_app(config)
 
 
 
-# firebase_admin.initialize_app(cred, {
-#     'storageBucket': 'redbook-910e9.appspot.com'
-# })
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'redbook-910e9.appspot.com'
+})
 
 # firebase_admin.initialize_app(cred, {
 #     'databaseURL': "https:///redbook-910e9.web.app"
@@ -48,12 +51,27 @@ document_id = 'VaQIZzpBplPRuHV9KQzW8kJDJ2f2'
 # document_id = 'test'
 
 # Get the document with the specific ID from the accounts collection
-doc = db.collection('accounts').document(document_id).get()
+# doc = db.collection('accounts').document(document_id).get()
+
+
 # doc = db.child('accounts').child(document_id).get()
 #(document_id).get()
 # doc.set("test")
 # document_data_json = json.dumps(doc.val(), indent=4)
 # print(f'Document Data (JSON):\n{document_data_json}')
-print(doc.to_dict())
+# answered = doc.to_dict()['answered']
+
+# def find_unanswered_questions(answered):
+#     pass
+
+question = {
+            "correctAnswer": 'D',
+            "difficulty": 'Medium',
+            "photoType": 'single',
+            "skill": 'Boundaries',
+        }
+
+document_ref = db.collection('reading_questions').document('boop')
+document_ref.set(question)
 
 

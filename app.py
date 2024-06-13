@@ -3,6 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore, storage
 from dotenv import load_dotenv
 import requests
+import json
 import os
 import io
 
@@ -25,13 +26,15 @@ config = {
 # storage = firebase.storage()
 
 # set credientials for firebase admin
-cred = credentials.Certificate('redbook-910e9-firebase-adminsdk-hzs4e-a467f4cf29.json')
-# firebase_admin.initialize_app(cred)
+cred = credentials.Certificate(os.getenv('CERT_PATH'))
 
-# setup firebase admin for image storage
+# setup firebase admin with acccess to the storage bucket
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'redbook-910e9.appspot.com'
+    'storageBucket': os.getenv('STORAGE_BUCKET_URL')
 })
+
+# setup firebase admin with access to the database
+db = firestore.client()
 
 # probably JWT token encryption
 app.secret_key = os.getenv('DATABASE_SECRET')
@@ -51,6 +54,15 @@ def quiz():
         else:
             # user_data = db.collection('accounts').where('field_name', '==', specific_string).stream()
             # print(info)
+            uid = session['uid']
+
+            # get the user's data from the database
+            doc = db.collection('accounts').document(uid).get()
+            user_data = doc.to_dict()
+
+            print(user_data)
+
+
             return render_template('quiz.html', image_name='1007161b.png')
     return redirect(url_for('home'))
 
