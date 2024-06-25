@@ -1,4 +1,4 @@
-from flask import Flask, session, render_template, request, redirect, url_for, send_file, abort
+from flask import Flask, session, render_template, request, redirect, url_for, send_file, abort, jsonify
 import firebase_admin
 from firebase_admin import credentials, auth, firestore, storage
 from dotenv import load_dotenv
@@ -45,26 +45,26 @@ def dashboard():
         return render_template('dashboard.html')
     return redirect(url_for('home'))
 
-@app.route('/quiz', methods=['GET', 'POST'])
-def quiz():
-    if session['is_logged_in'] == True:
-        # return render_template('quiz.html', image_name='1007161b.png')
-        if session['quiz_params'] == None:
-            return redirect(url_for('dashboard'))
-        else:
-            # user_data = db.collection('accounts').where('field_name', '==', specific_string).stream()
-            # print(info)
-            uid = session['uid']
+# @app.route('/quiz', methods=['GET', 'POST'])
+# def quiz():
+#     if session['is_logged_in'] == True:
+#         # return render_template('quiz.html', image_name='1007161b.png')
+#         if session['quiz_params'] == None:
+#             return redirect(url_for('dashboard'))
+#         else:
+#             # user_data = db.collection('accounts').where('field_name', '==', specific_string).stream()
+#             # print(info)
+#             uid = session['uid']
+#             quiz_params = session['quiz_params']
 
-            # get the user's data from the database
-            doc = db.collection('accounts').document(uid).get()
-            user_data = doc.to_dict()
+#             # get the user's data from the database
+#             doc = db.collection('accounts').document(uid).get()
+#             user_data = doc.to_dict()
 
-            print(user_data)
+#             print(user_data)
 
-
-            return render_template('quiz.html', image_name='1007161b.png')
-    return redirect(url_for('home'))
+#             return render_template('quiz.html', image_name='1007161b.png')
+#     return redirect(url_for('home'))
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -112,6 +112,134 @@ def setQuizParams():
         session['quiz_params'] = [selectedTest, selectedDiff, selectedSkill]
         print(session['quiz_params'])
     return redirect(url_for('quiz'))
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    return render_template('settings.html')
+
+@app.route('/wipecompleted', methods=['GET', 'POST'])
+def wipecompleted():
+    if request.method == 'POST':
+        if session['is_logged_in'] == True:
+            uid = session['uid']
+            db.collection('accounts').document(uid).update({
+                'answered': []
+            })
+            db.collection('accounts').document(uid).update({
+                'answeredCorrectly': []
+            })
+            db.collection('accounts').document(uid).update({
+                'answeredIncorrectly': []
+            })
+    return redirect(url_for('settings'))
+
+@app.route('/quiz', methods=['GET', 'POST'])
+def quiz():
+    if session['is_logged_in'] == True:
+        if session['quiz_params'] == None:
+            return redirect(url_for('dashboard'))
+        else:
+            uid = session['uid']
+            quiz_params = session['quiz_params']
+
+            test = quiz_params[0]
+            difficulty = quiz_params[1]
+            skill = quiz_params[2]
+
+            return render_template('quiz2.html')
+
+@app.route('/get_next_question', methods=['GET', 'POST'])
+def get_next_question():
+    data = request.json
+
+    uid = session['uid']
+    quiz_params = session['quiz_params']
+
+    test = quiz_params[0]
+    difficulty = quiz_params[1]
+    skill = quiz_params[2]
+
+    session['question_index'] = 0
+
+    # current_index = data.get('current_index')
+    selected_answer = data.get('selected_answer')
+    answered_question = data.get('answered_question')
+    handle_grading(answered_question, selected_answer)
+
+    # query = db.collection('reading_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
+    # query = db.collection('reading_questions').filter('difficulty', '==', difficulty).filter('skill', '==', skill)
+
+    if (test == 'RD' and skill == 'Random' and difficulty == 'Random'):
+        print("querying RD random skill random difficulty")
+        query = db.collection('reading_questions')
+    elif (test == 'RD' and skill == 'Random'):
+        print("querying RD random skill specific difficulty")
+        query = db.collection('reading_questions').where('difficulty', '==', difficulty)
+    elif (test == 'RD' and difficulty == 'Random'):
+        print("querying RD specific skill random difficulty")
+        query = db.collection('reading_questions').where('skill', '==', skill)
+    elif (test == 'RD'):
+        print("querying RD specific skill specific difficulty")
+        query = db.collection('reading_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
+
+    if (test == 'MH' and skill == 'Random' and difficulty == 'Random'):
+        print("querying MH random skill random difficulty")
+        query = db.collection('math_questions')
+    elif (test == 'MH' and skill == 'Random'):
+        print("querying MH random skill specific difficulty")
+        query = db.collection('math_questions').where('difficulty', '==', difficulty)
+    elif (test == 'MH' and difficulty == 'Random'):
+        print("querying MH specific skill random difficulty")
+        query = db.collection('math_questions').where('skill', '==', skill)
+    elif (test == 'MH'):
+        print("querying MH specific skill specific difficulty")
+        query = db.collection('math_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
+
+
+    # query = db.collection('reading_questions').where('difficulty', '==', "Medium").where('skill', '==', "Command of Evidence")
+    # query = db.collection('reading_questions').filter('difficulty', '==', "Medium").filter('skill', '==', "Command of Evidence")
+
+    questions = [doc.to_dict() for doc in query.stream()]
+
+    print(questions)
+
+    if session['question_index'] < len(questions):
+        answered = db.collection('accounts').document(uid).get().to_dict().get('answered')
+        question = find_next_question(questions, answered)
+        print(question)
+
+        if question == None:
+            return jsonify({'error': 'No more questions'}), 404
+
+        question_id = question['sat_id']
+        print(question_id)
+
+        document_ref = db.collection('accounts').document(uid)
+        document_ref.update({
+            'answered': firestore.ArrayUnion([question_id])
+        })
+
+
+        return jsonify({
+            'question': question_id,
+        })
+
+
+    # if session['question_index'] < len(questions):
+    #     question_data = questions[session['question_index']]
+
+    #     print(question_data)
+    #     image_name = question_data.get('image_name')
+    #     question_data['image_url'] = url_for('get_image', image_name=image_name)
+
+    #     session['question_index'] += 1
+        
+    #     # Optionally, you can store the selected answer in Firestore or process it as needed
+        
+    #     return jsonify({
+    #         'question': question_data,
+    #     })
+    return jsonify({'error': 'No more questions'}), 404
     
 @app.route('/images/<image_name>')
 def get_image(image_name):
@@ -123,11 +251,34 @@ def get_image(image_name):
         print(e)
         abort(404)
 
+def handle_grading(question_id, selected_answer):
+    question = db.collection('reading_questions').document(question_id).get().to_dict()
+    print("grabbing question data of what was completed...")
+    print(question)
+    if question == None:
+        return
+    correct_answer = question['correctAnswer']
+    uid = session['uid']
+    if (selected_answer == correct_answer):
+        db.collection('accounts').document(uid).update({
+            'answeredCorrectly': firestore.ArrayUnion([question_id])
+        })
+    else:
+        db.collection('accounts').document(uid).update({
+            'answeredIncorrectly': firestore.ArrayUnion([question_id])
+        })
+
 def fetch_image(image_name):
     bucket = storage.bucket()
     blob = bucket.blob(image_name)
     image_data = blob.download_as_bytes()
     return io.BytesIO(image_data)
+
+def find_next_question(questions, answered):
+    for question in questions:
+        if question['sat_id'] not in answered:
+            return question
+    return None
 
 def sign_up_with_email_password(email, password):
     try:

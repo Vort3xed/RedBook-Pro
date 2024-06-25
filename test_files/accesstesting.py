@@ -1,5 +1,5 @@
 import pyrebase
-from firebase_admin import credentials, firestore, initialize_app
+from firebase_admin import credentials, firestore, initialize_app, storage
 import firebase_admin
 import json
 import os
@@ -18,12 +18,9 @@ config = {
     'databaseURL': os.getenv('DATABASE_URL')
 }
 
-
 cred = credentials.Certificate(os.getenv('CERT_PATH'))
 # firebase_admin.initialize_app(cred)
 # firebase = pyrebase.initialize_app(config)
-
-
 
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'redbook-910e9.appspot.com'
@@ -45,9 +42,9 @@ firebase_admin.initialize_app(cred, {
 
 # info = auth.get_account_info(user['idToken'])
 # print(info)
-db = firestore.client()
+# db = firestore.client()
 
-document_id = 'VaQIZzpBplPRuHV9KQzW8kJDJ2f2'
+# document_id = 'VaQIZzpBplPRuHV9KQzW8kJDJ2f2'
 # document_id = 'test'
 
 # Get the document with the specific ID from the accounts collection
@@ -64,14 +61,12 @@ document_id = 'VaQIZzpBplPRuHV9KQzW8kJDJ2f2'
 # def find_unanswered_questions(answered):
 #     pass
 
-question = {
-            "correctAnswer": 'D',
-            "difficulty": 'Medium',
-            "photoType": 'single',
-            "skill": 'Boundaries',
-        }
+# question = {
+#             "correctAnswer": 'D',
+#             "difficulty": 'Medium',
+#             "photoType": 'single',
+#             "skill": 'Boundaries',
+#         }
 
-document_ref = db.collection('reading_questions').document('boop')
-document_ref.set(question)
-
-
+# document_ref = db.collection('reading_questions').document('boop')
+# document_ref.set(question)
