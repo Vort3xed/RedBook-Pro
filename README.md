@@ -55,8 +55,13 @@ TODO:
 - ~~determine if question was answered correctly~~
 - ~~redirect to dashboard once questions are all answered~~
 - ~~map quiz params to the actual query~~
-- add math questions
+- ~~add math questions~~
 - show statistics
 - css and styling
 - add more questions
 - DATA SANITIZATION (dont break database)
+- add contact page
+- remove console.logs and print statements
+- add more comments in code
+- release for beta testing
+- add sign in with google
