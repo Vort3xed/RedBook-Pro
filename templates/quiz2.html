@@ -15,6 +15,7 @@
         });
 
         function loadNextQuestion(selectedAnswer = null) {
+            console.log(selectedAnswer)
             fetch('/get_next_question', {
                 method: 'POST',
                 headers: {
@@ -34,7 +35,18 @@
                     console.log("attempting to update question image");
                     // currentQuestionIndex++;
                     console.log(data.question);
-                    updateQuestionImage(data.question);
+                    updateQuestionImage(data.question, data.photoType);
+
+                    document.getElementById('mcq-answer').hidden = false;
+                    document.getElementById('mcq-submit-button').hidden = false;
+                    document.getElementById('frq-answer').hidden = true;
+                    document.getElementById('frq-submit-button').hidden = true;
+                    if (data.isFreeResponse) {
+                        document.getElementById('mcq-answer').hidden = true;
+                        document.getElementById('mcq-submit-button').hidden = true;
+                        document.getElementById('frq-answer').hidden = false;
+                        document.getElementById('frq-submit-button').hidden = false;
+                    }
 
                     //replace mutliple choice with free response box if freeResponse == true
                 }
@@ -44,13 +56,29 @@
             });
 
         }
-
-        function updateQuestionImage(question_id) {
+        function updateQuestionImage(question_id, photoType) {
             document.getElementById('questionIDLabel').textContent = question_id;
             question_id = question_id + '.png';
             const imageUrl = "{{ url_for('get_image', image_name='') }}" + question_id;
             console.log('Image URL:', imageUrl)
             document.getElementById('question-image').src = imageUrl;
+            document.getElementById('question-image-2').hidden = true;
+
+            if (photoType == 'multi'){
+                multi_question_id = question_id.split('.')[0] + '_2.png';
+                const imageUrl = "{{ url_for('get_image', image_name='') }}" + multi_question_id;
+                document.getElementById('question-image-2').src = imageUrl;
+                document.getElementById('question-image-2').hidden = false;
+            }
+
+            deselectAnswer();
+        }
+
+        function deselectAnswer() {
+            const selectedOption = document.querySelector('input[name="mcqAnswerChoices"]:checked');
+            if (selectedOption) {
+                selectedOption.checked = false;
+            }
         }
     </script>
     </head>
@@ -59,20 +87,89 @@
         {% include 'nav.html' %}
     </header>
     <body>
-        <div id="question-container" class="flex flex-col justify-center items-center">
-            <h1 class="text-lg">Question ID: <span class="font-semibold" id="questionIDLabel">Loading...</span></h1>
-            <img id="question-image" src alt="Question Image">
+        <div id="question-container" class="flex justify-center items-center">
+            <div class="border-gray-400 bg-gray-100 p-4 border rounded-md mx-4">
+                <h1 class="text-lg pb-2">Question ID: <span class="font-semibold" id="questionIDLabel">Loading...</span></h1>
+                <img id="question-image" src alt="Question Image">
+                <img hidden id="question-image-2" src alt="Question Image-2">
+            </div>
             <!-- <img id="question-image" src="{{ url_for('get_image', image_name=image_name) }}" alt="Image"> -->
 
             <!-- <p> {{ url_for('get_image', image_name='') + '1dc74ae7' }}</p>
         <img src="{{ url_for('get_image', image_name='1dc74ae7.png') }}" alt="Image"> -->
 
-            <div class="pt-5" id="answers">
+            <!-- <div class="pt-5" id="answers">
                 <button class="mx-4 rounded-md border px-5 py-3" onclick="loadNextQuestion('A')">A</button>
                 <button class="mx-4 rounded-md border px-5 py-3" onclick="loadNextQuestion('B')">B</button>
                 <button class="mx-4 rounded-md border px-5 py-3" onclick="loadNextQuestion('C')">C</button>
                 <button class="mx-4 rounded-md border px-5 py-3" onclick="loadNextQuestion('D')">D</button>
-            </div>
+            </div> -->
+
+            <!-- <select class="pt-5" id="mcqAnswerChoices">
+                <option class="mx-4 rounded-md border px-5 py-3" value="A">A</option>
+                <option class="mx-4 rounded-md border px-5 py-3" value="B">B</option>
+                <option class="mx-4 rounded-md border px-5 py-3" value="C">C</option>
+                <option class="mx-4 rounded-md border px-5 py-3" value="D">D</option>
+            </select> -->
+
+            <ul id="mcq-answer" class="my-3">
+                <li>
+                    <input class="hidden peer" type="radio" id="A"
+                        name="mcqAnswerChoices" value="A">
+                    <label for="A"
+                        class="my-2 inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
+                        <div class="block">
+                            <div class="w-full text-lg font-semibold">A</div>
+                        </div>
+                    </label>
+                </li>
+                <li>
+                    <input class="hidden peer" type="radio" id="B"
+                        name="mcqAnswerChoices" value="B">
+                    <label for="B"
+                        class="my-2 inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
+                        <div class="block">
+                            <div class="w-full text-lg font-semibold">B</div>
+                        </div>
+                    </label>
+                </li>
+                <li>
+                    <input class="hidden peer" type="radio" id="C"
+                        name="mcqAnswerChoices" value="C">
+                    <label for="C"
+                        class="my-2 inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
+                        <div class="block">
+                            <div class="w-full text-lg font-semibold">C</div>
+                        </div>
+                    </label>
+                </li>
+                <li>
+                    <input class="hidden peer" type="radio" id="D"
+                        name="mcqAnswerChoices" value="D">
+                    <label for="D"
+                        class="my-2 inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
+                        <div class="block">
+                            <div class="w-full text-lg font-semibold">D</div>
+                        </div>
+                    </label>
+                </li>
+            </ul>
+            <button
+                id="mcq-submit-button"
+                class="mx-4 rounded-md border px-5 py-3 bg-blue-600 text-white hover:bg-blue-700"
+                onclick="loadNextQuestion(document.querySelector('input[name=\'mcqAnswerChoices\']:checked').value)">Submit!</button>
+
+
+            <input
+                type="text"
+                id="frq-answer"
+                class="border border-gray-300 p-2 rounded-md"
+                placeholder="Enter your answer here"></input>
+            <button
+                id="frq-submit-button"
+                class="mx-4 rounded-md border px-5 py-3 bg-blue-600 text-white hover:bg-blue-700"
+                onclick="loadNextQuestion(document.getElementById('frq-answer').value)">Submit!</button>
+            
         </div>
 
         <script

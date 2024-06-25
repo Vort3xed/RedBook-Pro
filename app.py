@@ -212,6 +212,11 @@ def get_next_question():
             return jsonify({'error': 'No more questions'}), 404
 
         question_id = question['sat_id']
+        photo_type = question['photoType']
+        is_free_response = True
+        if question.get('freeResponse') is not None:
+            is_free_response = question['freeResponse']
+
         print(question_id)
 
         document_ref = db.collection('accounts').document(uid)
@@ -222,6 +227,8 @@ def get_next_question():
 
         return jsonify({
             'question': question_id,
+            'photoType': photo_type,
+            'isFreeResponse': is_free_response
         })
 
 
@@ -252,7 +259,11 @@ def get_image(image_name):
         abort(404)
 
 def handle_grading(question_id, selected_answer):
-    question = db.collection('reading_questions').document(question_id).get().to_dict()
+    print("the selected answer: " + str(selected_answer))
+    if db.collection('reading_questions').document(question_id).get().to_dict() == None:
+        question = db.collection('math_questions').document(question_id).get().to_dict()
+    else:
+        question = db.collection('reading_questions').document(question_id).get().to_dict()
     print("grabbing question data of what was completed...")
     print(question)
     if question == None:
