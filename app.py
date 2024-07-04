@@ -168,52 +168,52 @@ def stats():
         return render_template('stats.html')
     return redirect(url_for('home'))
 
-@app.route('/get_stats', methods=['GET', 'POST'])
-def getstats():
-    if session['is_logged_in'] == True:
-        uid = session['uid']
-        answered = db.collection('accounts').document(uid).get().to_dict().get('answered')
-        answered_correctly = db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly')
-        answered_incorrectly = db.collection('accounts').document(uid).get().to_dict().get('answeredIncorrectly')
+# @app.route('/get_stats', methods=['GET', 'POST'])
+# def getstats():
+#     if session['is_logged_in'] == True:
+#         uid = session['uid']
+#         answered = db.collection('accounts').document(uid).get().to_dict().get('answered')
+#         answered_correctly = db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly')
+#         answered_incorrectly = db.collection('accounts').document(uid).get().to_dict().get('answeredIncorrectly')
 
-        if len(answered) == 0:
-            return render_template('stats.html', total_accuracy=0, reading_skill_accuracy=[0,0,0,0,0,0,0,0,0], math_skill_accuracy=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-        total_accuracy = len(answered_correctly) / len(answered) * 100
-        total_accuracy = round(total_accuracy, 2)
+#         if len(answered) == 0:
+#             return render_template('stats.html', total_accuracy=0, reading_skill_accuracy=[0,0,0,0,0,0,0,0,0], math_skill_accuracy=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+#         total_accuracy = len(answered_correctly) / len(answered) * 100
+#         total_accuracy = round(total_accuracy, 2)
 
-        reading_skill_accuracy = []
-        math_skill_accuracy = []
+#         reading_skill_accuracy = []
+#         math_skill_accuracy = []
 
-        all_reading_skills = ["Central Ideas and Details","Command of Evidence","Words in Context","Text Structure and Purpose","Cross-Text Connections","Rhetorical Synthesis","Transitions","Boundaries","Form, Structure, and Sense"]
-        all_math_skills = ["Linear equations in one variable", "Linear functions", "Linear equations in two variables", "Systems of two linear equations in two variables", "Linear inequalities in one or two variables", "Nonlinear functions", "Nonlinear equations in one variable and systems of equations in two variables", "Equivalent expressions", "Ratios, rates, proportional relationships, and units", "Percentages", "One-variable data: Distributions and measures of center and spread", "Two-variable data: Models and scatterplots", "Probability and conditional probability", "Inference from sample statistics and margin of error", "Evaluating statistical claims: Observational studies and experiments", "Area and volume", "Lines, angles, and triangles", "Right triangles and trigonometry", "Circles"]
+#         all_reading_skills = ["Central Ideas and Details","Command of Evidence","Words in Context","Text Structure and Purpose","Cross-Text Connections","Rhetorical Synthesis","Transitions","Boundaries","Form, Structure, and Sense"]
+#         all_math_skills = ["Linear equations in one variable", "Linear functions", "Linear equations in two variables", "Systems of two linear equations in two variables", "Linear inequalities in one or two variables", "Nonlinear functions", "Nonlinear equations in one variable and systems of equations in two variables", "Equivalent expressions", "Ratios, rates, proportional relationships, and units", "Percentages", "One-variable data: Distributions and measures of center and spread", "Two-variable data: Models and scatterplots", "Probability and conditional probability", "Inference from sample statistics and margin of error", "Evaluating statistical claims: Observational studies and experiments", "Area and volume", "Lines, angles, and triangles", "Right triangles and trigonometry", "Circles"]
 
-        print(len(all_reading_skills))
-        print(len(all_math_skills))
+#         print(len(all_reading_skills))
+#         print(len(all_math_skills))
 
-        for skill in all_reading_skills:
-            all_questions = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answered'), skill, "reading")
-            answered_correctly = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly'), skill, "reading")
-            if (len(all_questions) == 0):
-                reading_skill_accuracy.append(0)
-            else:
-                reading_skill_accuracy.append(len(answered_correctly) / len(all_questions) * 100)
+#         for skill in all_reading_skills:
+#             all_questions = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answered'), skill, "reading")
+#             answered_correctly = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly'), skill, "reading")
+#             if (len(all_questions) == 0):
+#                 reading_skill_accuracy.append(0)
+#             else:
+#                 reading_skill_accuracy.append(len(answered_correctly) / len(all_questions) * 100)
 
-        for skill in all_math_skills:
-            all_questions = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answered'), skill, "math")
-            answered_correctly = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly'), skill, "math")
-            if (len(all_questions) == 0):
-                math_skill_accuracy.append(0)
-            else:
-                math_skill_accuracy.append(len(answered_correctly) / len(all_questions) * 100)
+#         for skill in all_math_skills:
+#             all_questions = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answered'), skill, "math")
+#             answered_correctly = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly'), skill, "math")
+#             if (len(all_questions) == 0):
+#                 math_skill_accuracy.append(0)
+#             else:
+#                 math_skill_accuracy.append(len(answered_correctly) / len(all_questions) * 100)
 
-        print(total_accuracy)
-        print(reading_skill_accuracy)
-        print(math_skill_accuracy)
-        return jsonify({
-            'total_accuracy': total_accuracy,
-            'reading_skill_accuracy': reading_skill_accuracy,
-            'math_skill_accuracy': math_skill_accuracy
-        })
+#         print(total_accuracy)
+#         print(reading_skill_accuracy)
+#         print(math_skill_accuracy)
+#         return jsonify({
+#             'total_accuracy': total_accuracy,
+#             'reading_skill_accuracy': reading_skill_accuracy,
+#             'math_skill_accuracy': math_skill_accuracy
+#         })
 
 def filter_by_skill(questions, skill, type):
     filtered = []
