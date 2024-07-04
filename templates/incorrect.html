@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Dashboard</title>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.1/flowbite.min.css"
+            rel="stylesheet" />
+
+        <!-- <style>
+                .hidden {
+                    display: none;
+                }
+            </style> -->
+
+    </head>
+
+    <header>
+        {% include 'nav.html' %}
+    </header>
+
+    <body>
+        <!-- <h1>Incorrectly Answered</h1>
+        <p>Welcome to the dashboard!</p> -->
+
+        {% for incorrect in answered_incorrectly %}
+        <div class="border-gray-400 bg-gray-100 p-4 border rounded-md m-4 flex">
+            <div class="m-4">
+                <h1 class="text-lg pb-2">Question ID: <span class="font-semibold" id="questionIDLabel">{{ incorrect.split("_")[0] }}</span></h1>
+                <img id="question-image" src="{{ url_for('get_image', image_name=incorrect.split("_")[0] + ".png") }}" alt="Question Image">
+                <img hidden id="question-image-2" src alt="Question Image-2">
+            </div>
+            <div class="">
+                <h1 class="text-lg p-2">Your Answer: <span class="font-semibold" id="questionIDLabel">{{ incorrect.split("_")[1] }}</span></h1>
+                <h1 class="text-lg p-2">Correct Answer: <span class="font-semibold" id="questionIDLabel">{{ incorrect.split("_")[2] }}</span></h1>
+            </div>
+        </div>
+        {% endfor %}
+
+
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    </body>
+</html>

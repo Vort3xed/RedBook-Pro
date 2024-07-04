@@ -147,6 +147,89 @@ def quiz():
             skill = quiz_params[2]
 
             return render_template('quiz2.html')
+        
+@app.route('/unreadAndQuit', methods=['GET', 'POST'])
+def unreadAndQuit():
+    if request.method == 'POST':
+        if session['is_logged_in'] == True:
+            data = request.json
+            uid = session['uid']
+            question_id = data.get('answered_question')
+            print("question_id: {}", question_id)
+            db.collection('accounts').document(uid).update({
+                'answered': firestore.ArrayRemove([question_id])
+            })
+
+    return redirect(url_for('dashboard'))
+
+@app.route('/stats', methods=['GET', 'POST'])
+def stats():
+    if session['is_logged_in'] == True:
+        return render_template('stats.html')
+    return redirect(url_for('home'))
+
+@app.route('/get_stats', methods=['GET', 'POST'])
+def getstats():
+    if session['is_logged_in'] == True:
+        uid = session['uid']
+        answered = db.collection('accounts').document(uid).get().to_dict().get('answered')
+        answered_correctly = db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly')
+        answered_incorrectly = db.collection('accounts').document(uid).get().to_dict().get('answeredIncorrectly')
+
+        if len(answered) == 0:
+            return render_template('stats.html', total_accuracy=0, reading_skill_accuracy=[0,0,0,0,0,0,0,0,0], math_skill_accuracy=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        total_accuracy = len(answered_correctly) / len(answered) * 100
+        total_accuracy = round(total_accuracy, 2)
+
+        reading_skill_accuracy = []
+        math_skill_accuracy = []
+
+        all_reading_skills = ["Central Ideas and Details","Command of Evidence","Words in Context","Text Structure and Purpose","Cross-Text Connections","Rhetorical Synthesis","Transitions","Boundaries","Form, Structure, and Sense"]
+        all_math_skills = ["Linear equations in one variable", "Linear functions", "Linear equations in two variables", "Systems of two linear equations in two variables", "Linear inequalities in one or two variables", "Nonlinear functions", "Nonlinear equations in one variable and systems of equations in two variables", "Equivalent expressions", "Ratios, rates, proportional relationships, and units", "Percentages", "One-variable data: Distributions and measures of center and spread", "Two-variable data: Models and scatterplots", "Probability and conditional probability", "Inference from sample statistics and margin of error", "Evaluating statistical claims: Observational studies and experiments", "Area and volume", "Lines, angles, and triangles", "Right triangles and trigonometry", "Circles"]
+
+        print(len(all_reading_skills))
+        print(len(all_math_skills))
+
+        for skill in all_reading_skills:
+            all_questions = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answered'), skill, "reading")
+            answered_correctly = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly'), skill, "reading")
+            if (len(all_questions) == 0):
+                reading_skill_accuracy.append(0)
+            else:
+                reading_skill_accuracy.append(len(answered_correctly) / len(all_questions) * 100)
+
+        for skill in all_math_skills:
+            all_questions = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answered'), skill, "math")
+            answered_correctly = filter_by_skill(db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly'), skill, "math")
+            if (len(all_questions) == 0):
+                math_skill_accuracy.append(0)
+            else:
+                math_skill_accuracy.append(len(answered_correctly) / len(all_questions) * 100)
+
+        print(total_accuracy)
+        print(reading_skill_accuracy)
+        print(math_skill_accuracy)
+        return jsonify({
+            'total_accuracy': total_accuracy,
+            'reading_skill_accuracy': reading_skill_accuracy,
+            'math_skill_accuracy': math_skill_accuracy
+        })
+
+def filter_by_skill(questions, skill, type):
+    filtered = []
+    if type == "reading":
+        for question in questions:
+            
+            if db.collection('reading_questions').document(question).get().to_dict() != None and db.collection('reading_questions').document(question).get().to_dict().get('skill') == skill:
+                filtered.append(question)
+    else:
+        for question in questions:
+            if db.collection('math_questions').document(question).get().to_dict() != None and db.collection('math_questions').document(question).get().to_dict().get('skill') == skill:
+                filtered.append(question)
+
+    print(filtered)
+    return filtered
+
 
 @app.route('/get_next_question', methods=['GET', 'POST'])
 def get_next_question():
@@ -247,6 +330,15 @@ def get_next_question():
     #         'question': question_data,
     #     })
     return jsonify({'error': 'No more questions'}), 404
+
+@app.route('/incorrect', methods=['GET', 'POST'])
+def incorrect():
+    if session['is_logged_in'] == True:
+        uid = session['uid']
+        answered_incorrectly = db.collection('accounts').document(uid).get().to_dict().get('answeredIncorrectly')
+        answered_incorrectly.reverse()
+        return render_template('incorrect.html', answered_incorrectly=answered_incorrectly)
+
     
 @app.route('/images/<image_name>')
 def get_image(image_name):
@@ -276,7 +368,7 @@ def handle_grading(question_id, selected_answer):
         })
     else:
         db.collection('accounts').document(uid).update({
-            'answeredIncorrectly': firestore.ArrayUnion([question_id])
+            'answeredIncorrectly': firestore.ArrayUnion([question_id + "_" + selected_answer + "_" + correct_answer])
         })
 
 def fetch_image(image_name):

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Dashboard</title>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.1/flowbite.min.css"
+            rel="stylesheet" />
+
+        <!-- <style>
+                .hidden {
+                    display: none;
+                }
+            </style> -->
+
+            <script>
+                document.addEventListener('DOMContentLoaded', (event) => {
+                    fetch_stats();
+                });
+
+                function fetch_stats() {
+                    fetch('/get_stats', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({})
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            document.getElementById('stats').innerHTML = data.total_accuracy;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                }
+            </script>
+
+    </head>
+
+    <header>
+        {% include 'nav.html' %}
+    </header>
+    <body>
+        <h1>total accuracy: <span id="stats">loading stats...</span></h1>
+
+        <!-- <div id="stats"></div> -->
+
+
+
+    </body>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+</html>

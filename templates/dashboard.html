@@ -12,7 +12,6 @@
                 }
             </style> -->
 
-        
     </head>
 
     <header>
@@ -20,86 +19,102 @@
     </header>
 
     <body>
-        <h1>Dashboard</h1>
-        <p>Welcome to the dashboard!</p>
+        <!-- <h1>Dashboard</h1>
+        <p>Welcome to the dashboard!</p> -->
 
-        <form action="/setQuizParams" method="post" class="max-w-sm mx-auto">
-            <label for="testselect"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
-                Test</label>
-            <select id="testselect" name="testselect"
-                class="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option selected value="RD">Reading/Writing</option>
-                <option value="MH">Math</option>
-            </select>
-            <label for="difficultyselect"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
-                Difficulty</label>
-            <select id="difficultyselect" name="difficultyselect"
-                class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option selected>Random</option>
-                <option value="E">Easy</option>
-                <option value="M">Medium</option>
-                <option value="H">Hard</option>
-            </select>
-            <div id="readingSkills">
-                <label for="skillselectreading"
+        <form action="/setQuizParams" method="post" class="max-w-sm mx-auto flex">
+            <div class="w-full mt-4">
+                <label for="testselect"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
-                    Specific Skill</label>
-                <select id="skillselectreading" name="readingskill"
+                    Test</label>
+                <select id="testselect" name="testselect"
+                    class="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option selected value="RD">Reading/Writing</option>
+                    <option value="MH">Math</option>
+                </select>
+                <label for="difficultyselect"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                    Difficulty</label>
+                <select id="difficultyselect" name="difficultyselect"
                     class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <option selected>Random</option>
-                    <option value="CID">Central Ideas and Details</option>
-                    <option value="CE">Command of Evidence</option>
-                    <option value="WC">Words in Context</option>
-                    <option value="TSP">Text Structure and Purpose</option>
-                    <option value="CTC">Cross-Text Connections</option>
-                    <option value="RS">Rhetorical Synthesis</option>
-                    <option value="T">Transitions</option>
-                    <option value="B">Boundaries</option>
-                    <option value="FSS">Form, Structure, and Sense</option>
+                    <option value="E">Easy</option>
+                    <option value="M">Medium</option>
+                    <option value="H">Hard</option>
                 </select>
-            </div>
-            <div id="mathSkills" class="hidden">
-                <label for="skillselectmath"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
-                    Specific Skill</label>
-                <select id="skillselectmath" name="mathskill"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option selected>Random</option>
-                    <option value="A">Linear equations in one variable</option>
-                    <option value="G">Linear functions</option>
-                    <option value="T">Linear equations in two variables</option>
-                    <option value="S">Systems of two linear equations in two variables</option>
-                    <option value="P">Linear inequalities in one or two variables</option>
-                    <option value="P">Nonlinear functions</option>
-                    <option value="P">Nonlinear equations in one variable and systems of equations in two variables</option>
-                    <option value="P">Equivalent expressions</option>
-                    <option value="P">Ratios, rates, proportional relationships, and units</option>
-                    <option value="P">Percentages</option>
-                    <option value="P">One-variable data: Distributions and measures of center and spread</option>
-                    <option value="P">Two-variable data: Models and scatterplots</option>
-                    <option value="P">Probability and conditional probability</option>
-                    <option value="P">Inference from sample statistics and margin of error</option>
-                    <option value="P">Evaluating statistical claims: Observational studies and experiments</option>
-                    <option value="P">Area and volume</option>
-                    <option value="P">Lines, angles, and triangles</option>
-                    <option value="P">Right triangles and trigonometry</option>
-                    <option value="P">Circles</option>
-                </select>
-            </div>
+                <div id="readingSkills">
+                    <label for="skillselectreading"
+                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                        Specific Skill</label>
+                    <select id="skillselectreading" name="readingskill"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option selected>Random</option>
+                        <option value="CID">Central Ideas and Details</option>
+                        <option value="CE">Command of Evidence</option>
+                        <option value="WC">Words in Context</option>
+                        <option value="TSP">Text Structure and Purpose</option>
+                        <option value="CTC">Cross-Text Connections</option>
+                        <option value="RS">Rhetorical Synthesis</option>
+                        <option value="T">Transitions</option>
+                        <option value="B">Boundaries</option>
+                        <option value="FSS">Form, Structure, and Sense</option>
+                    </select>
+                </div>
+                <div id="mathSkills" class="hidden">
+                    <label for="skillselectmath"
+                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                        Specific Skill</label>
+                    <select id="skillselectmath" name="mathskill"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option selected>Random</option>
+                        <option value="LEOV">Linear equations in one
+                            variable</option>
+                        <option value="LF">Linear functions</option>
+                        <option value="LETV">Linear equations in two
+                            variables</option>
+                        <option value="STLET">Systems of two linear equations in two
+                            variables</option>
+                        <option value="LIOT">Linear inequalities in one or two
+                            variables</option>
+                        <option value="NF">Nonlinear functions</option>
+                        <option value="NEOV">Nonlinear equations in one variable
+                            and systems of equations in two variables</option>
+                        <option value="EE">Equivalent expressions</option>
+                        <option value="RRP">Ratios, rates, proportional
+                            relationships, and units</option>
+                        <option value="P">Percentages</option>
+                        <option value="ODDMCS">One-variable data: Distributions and
+                            measures of center and spread</option>
+                        <option value="TDMS">Two-variable data: Models and
+                            scatterplots</option>
+                        <option value="PCP">Probability and conditional
+                            probability</option>
+                        <option value="IFSSME">Inference from sample statistics and
+                            margin of error</option>
+                        <option value="ESCOSE">Evaluating statistical claims:
+                            Observational studies and experiments</option>
+                        <option value="AV">Area and volume</option>
+                        <option value="LAT">Lines, angles, and triangles</option>
+                        <option value="RTT">Right triangles and
+                            trigonometry</option>
+                        <option value="C">Circles</option>
+                    </select>
+                </div>
 
-            <input type="submit" value="Start Quiz"
-                class="block w-full p-2 mt-6 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-blue-600 dark:focus:ring-offset-2">
+                <input type="submit" value="Start Quiz"
+                    class="block w-full p-2 mt-6 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-blue-600 dark:focus:ring-offset-2">
+            </div>
+            <!-- <div>
+                <button>amount of questions?</button>
+            </div> -->
 
         </form>
 
-        <a href="/quiz">go to quiz</a>
-        <a href="/stats">go to stats</a>
-        <form action="/logout" method="post">
+        <!-- <a href="/quiz">go to quiz</a>
+        <a href="/stats">go to stats</a> -->
+        <!-- <form action="/logout" method="post">
             <input type="submit" value="Sign out">
-        </form>
-
+        </form> -->
 
         <script>
             document.getElementById('testselect').addEventListener('change', function () {
@@ -117,7 +132,6 @@
                 }
             });
         </script>
-
 
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
