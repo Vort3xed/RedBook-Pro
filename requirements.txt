@@ -1,0 +1,9 @@
+firebase_admin==6.5.0
+fitz==0.0.1.dev2
+Flask==2.2.3
+Pillow==9.5.0
+Pillow==10.4.0
+Pyrebase4==4.8.0
+python-dotenv==1.0.1
+python_docx==1.1.0
+Requests==2.32.3
