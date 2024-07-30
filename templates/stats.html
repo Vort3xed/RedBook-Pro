@@ -11,30 +11,71 @@
                     display: none;
                 }
             </style> -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', (event) => {
-                    fetch_stats();
-                });
+        <script>
+            document.addEventListener('DOMContentLoaded', (event) => {
+                fetch_stats();
+            });
 
-                function fetch_stats() {
-                    fetch('/get_stats', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
+            function fetch_stats() {
+                fetch('/get_stats', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        
+                        document.getElementById('totalaccuracy').innerHTML = data.total_accuracy;
+                        // document.getElementById('englishskillaccuracy').innerHTML = data.reading_skill_accuracy;
+                        // document.getElementById('mathskillaccuracy').innerHTML = data.math_skill_accuracy;
+                
+                        var ctx = document.getElementById('barChartReading').getContext('2d');
+                        var lineChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: ["Central Ideas and Details","Command of Evidence","Words in Context","Text Structure and Purpose","Cross-Text Connections","Rhetorical Synthesis","Transitions","Boundaries","Form, Structure, and Sense"],
+                                datasets: [{
+                                    label: 'Reading Skill Statistics',
+                                    backgroundColor: 'rgb(255, 99, 132)',
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    data: data.reading_skill_accuracy,
+                                }]
                             },
-                            body: JSON.stringify({})
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log(data);
-                            document.getElementById('stats').innerHTML = data.total_accuracy;
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
+                            options: {
+                                responsive: false,
+                            }
                         });
-                }
-            </script>
+
+                        var ctx = document.getElementById('barChartMath').getContext('2d');
+                        var lineChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: ["Linear equations in one variable", "Linear functions", "Linear equations in two variables", "Systems of two linear equations in two variables", "Linear inequalities in one or two variables", "Nonlinear functions", "Nonlinear equations in one variable and systems of equations in two variables", "Equivalent expressions", "Ratios, rates, proportional relationships, and units", "Percentages", "One-variable data: Distributions and measures of center and spread", "Two-variable data: Models and scatterplots", "Probability and conditional probability", "Inference from sample statistics and margin of error", "Evaluating statistical claims: Observational studies and experiments", "Area and volume", "Lines, angles, and triangles", "Right triangles and trigonometry", "Circles"],
+                                datasets: [{
+                                    label: 'Math Skill Statistics',
+                                    backgroundColor: 'rgb(255, 99, 132)',
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    data: data.math_skill_accuracy,
+                                }]
+                            },
+                            options: {
+                                responsive: false,
+                            }
+                        });
+
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+
+            
+        </script>
 
     </head>
 
@@ -42,14 +83,23 @@
         {% include 'nav.html' %}
     </header>
     <body>
-        <h1>total accuracy: (feature coming soon!) <span id="stats">loading stats...</span></h1>
+        <div class="m-4">
+            <h1 class="text-xl">Cumulative Accuracy: <span id="totalaccuracy">Loading...</span></h1>
 
-        <!-- <div id="stats"></div> -->
+            <!-- <span id="englishskillaccuracy"></span>
 
+                <span id="mathskillaccuracy"></span> -->
 
+            <div class="md:flex bg-gray-200 mt-3 rounded-md">
+                <canvas class id="barChartReading" width="400"
+                    height="400"></canvas>
 
+                <canvas id="barChartMath" width="850" height="400"></canvas>
+            </div>
+        </div>
     </body>
 
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
 </html>

@@ -79,7 +79,7 @@ def home():
 
             user = sign_in_with_email_password(email, password)
             # if it works, set the session variables and go to dashboard
-            session['is_logged_in'] = True
+            
             print("session is set to active")
             session['email'] = user['email']
             print("email is retrieved")
@@ -87,6 +87,7 @@ def home():
             print("uid is retrieved")
 
             print("success! uid -> " + str(session['uid']))
+            session['is_logged_in'] = True
             return redirect(url_for('dashboard'))
         except Exception as e:
             print("this is the exception: " + str(e))
@@ -109,7 +110,9 @@ def setQuizParams():
             selectedSkill = request.form["readingskill"]
         else:
             selectedSkill = request.form["mathskill"]
+        session['queryQuestions'] = []
         session['quiz_params'] = [selectedTest, selectedDiff, selectedSkill]
+        session['quiz_params_just_set'] = True
         print(session['quiz_params'])
     return redirect(url_for('quiz'))
 
@@ -215,6 +218,82 @@ def stats():
 #             'math_skill_accuracy': math_skill_accuracy
 #         })
 
+@app.route('/get_stats', methods=['GET', 'POST'])
+def getstats():
+    if session['is_logged_in'] == True:
+        uid = session['uid']
+        answered = db.collection('accounts').document(uid).get().to_dict().get('answered')
+        answered_correctly = db.collection('accounts').document(uid).get().to_dict().get('answeredCorrectly')
+        answered_incorrectly = db.collection('accounts').document(uid).get().to_dict().get('answeredIncorrectly')
+
+        if len(answered) == 0:
+            return render_template('stats.html', total_accuracy=0, reading_skill_accuracy=[0,0,0,0,0,0,0,0,0], math_skill_accuracy=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        total_accuracy = len(answered_correctly) / len(answered) * 100
+        total_accuracy = round(total_accuracy, 2)
+
+        reading_skill_accuracy = [0,0,0,0,0,0,0,0,0]
+        math_skill_accuracy = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+        reading_skill_correct = [0,0,0,0,0,0,0,0,0]
+        math_skill_correct = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+        reading_skill_incorrect = [0,0,0,0,0,0,0,0,0]
+        math_skill_incorrect = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+        all_reading_skills = ["Central Ideas and Details","Command of Evidence","Words in Context","Text Structure and Purpose","Cross-Text Connections","Rhetorical Synthesis","Transitions","Boundaries","Form, Structure, and Sense"]
+        all_math_skills = ["Linear equations in one variable", "Linear functions", "Linear equations in two variables", "Systems of two linear equations in two variables", "Linear inequalities in one or two variables", "Nonlinear functions", "Nonlinear equations in one variable and systems of equations in two variables", "Equivalent expressions", "Ratios, rates, proportional relationships, and units", "Percentages", "One-variable data: Distributions and measures of center and spread", "Two-variable data: Models and scatterplots", "Probability and conditional probability", "Inference from sample statistics and margin of error", "Evaluating statistical claims: Observational studies and experiments", "Area and volume", "Lines, angles, and triangles", "Right triangles and trigonometry", "Circles"]
+
+        print(len(all_reading_skills))
+        print(len(all_math_skills))
+
+        for question in answered_correctly:
+            # question_id = question.split("_")[0]
+            if db.collection('reading_questions').document(question).get().to_dict() != None:
+                skill = db.collection('reading_questions').document(question).get().to_dict().get('skill')
+                # index of the skill in the list of all reading skills
+                indx = all_reading_skills.index(skill)
+                reading_skill_correct[indx] += 1
+            else:
+                skill = db.collection('math_questions').document(question).get().to_dict().get('skill')
+                # index of the skill in the list of all math skills
+                indx = all_math_skills.index(skill)
+                math_skill_correct[indx] += 1
+
+        for question in answered_incorrectly:
+            question_id = question.split("_")[0]
+            if db.collection('reading_questions').document(question_id).get().to_dict() != None:
+                skill = db.collection('reading_questions').document(question_id).get().to_dict().get('skill')
+                # index of the skill in the list of all reading skills
+                indx = all_reading_skills.index(skill)
+                reading_skill_incorrect[indx] += 1
+            else:
+                skill = db.collection('math_questions').document(question_id).get().to_dict().get('skill')
+                # index of the skill in the list of all math skills
+                indx = all_math_skills.index(skill)
+                math_skill_incorrect[indx] += 1
+
+        for i in range(len(reading_skill_correct)):
+            if (reading_skill_correct[i] + reading_skill_incorrect[i]) == 0:
+                reading_skill_accuracy[i] = 0
+            else:
+                reading_skill_accuracy[i] = reading_skill_correct[i] / (reading_skill_correct[i] + reading_skill_incorrect[i]) * 100
+
+        for i in range(len(math_skill_correct)):
+            if (math_skill_correct[i] + math_skill_incorrect[i]) == 0:
+                math_skill_accuracy[i] = 0
+            else:
+                math_skill_accuracy[i] = math_skill_correct[i] / (math_skill_correct[i] + math_skill_incorrect[i]) * 100
+            
+
+        print(total_accuracy)
+        print(reading_skill_accuracy)
+        print(math_skill_accuracy)
+        return jsonify({
+            'total_accuracy': total_accuracy,
+            'reading_skill_accuracy': reading_skill_accuracy,
+            'math_skill_accuracy': math_skill_accuracy
+        })
+
 def filter_by_skill(questions, skill, type):
     filtered = []
     if type == "reading":
@@ -252,37 +331,44 @@ def get_next_question():
     # query = db.collection('reading_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
     # query = db.collection('reading_questions').filter('difficulty', '==', difficulty).filter('skill', '==', skill)
 
-    if (test == 'RD' and skill == 'Random' and difficulty == 'Random'):
-        print("querying RD random skill random difficulty")
-        query = db.collection('reading_questions')
-    elif (test == 'RD' and skill == 'Random'):
-        print("querying RD random skill specific difficulty")
-        query = db.collection('reading_questions').where('difficulty', '==', difficulty)
-    elif (test == 'RD' and difficulty == 'Random'):
-        print("querying RD specific skill random difficulty")
-        query = db.collection('reading_questions').where('skill', '==', skill)
-    elif (test == 'RD'):
-        print("querying RD specific skill specific difficulty")
-        query = db.collection('reading_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
 
-    if (test == 'MH' and skill == 'Random' and difficulty == 'Random'):
-        print("querying MH random skill random difficulty")
-        query = db.collection('math_questions')
-    elif (test == 'MH' and skill == 'Random'):
-        print("querying MH random skill specific difficulty")
-        query = db.collection('math_questions').where('difficulty', '==', difficulty)
-    elif (test == 'MH' and difficulty == 'Random'):
-        print("querying MH specific skill random difficulty")
-        query = db.collection('math_questions').where('skill', '==', skill)
-    elif (test == 'MH'):
-        print("querying MH specific skill specific difficulty")
-        query = db.collection('math_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
+    if session['quiz_params_just_set'] == True:
+        if (test == 'RD' and skill == 'Random' and difficulty == 'Random'):
+            print("querying RD random skill random difficulty")
+            query = db.collection('reading_questions')
+        elif (test == 'RD' and skill == 'Random'):
+            print("querying RD random skill specific difficulty")
+            query = db.collection('reading_questions').where('difficulty', '==', difficulty)
+        elif (test == 'RD' and difficulty == 'Random'):
+            print("querying RD specific skill random difficulty")
+            query = db.collection('reading_questions').where('skill', '==', skill)
+        elif (test == 'RD'):
+            print("querying RD specific skill specific difficulty")
+            query = db.collection('reading_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
+
+        if (test == 'MH' and skill == 'Random' and difficulty == 'Random'):
+            print("querying MH random skill random difficulty")
+            query = db.collection('math_questions')
+        elif (test == 'MH' and skill == 'Random'):
+            print("querying MH random skill specific difficulty")
+            query = db.collection('math_questions').where('difficulty', '==', difficulty)
+        elif (test == 'MH' and difficulty == 'Random'):
+            print("querying MH specific skill random difficulty")
+            query = db.collection('math_questions').where('skill', '==', skill)
+        elif (test == 'MH'):
+            print("querying MH specific skill specific difficulty")
+            query = db.collection('math_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
+
+        print('requerying questions and updating cache')
+        session['queryQuestions'] = [doc.to_dict() for doc in query.stream()]
+        session['quiz_params_just_set'] = False
 
 
     # query = db.collection('reading_questions').where('difficulty', '==', "Medium").where('skill', '==', "Command of Evidence")
     # query = db.collection('reading_questions').filter('difficulty', '==', "Medium").filter('skill', '==', "Command of Evidence")
 
-    questions = [doc.to_dict() for doc in query.stream()]
+    print("using cached questions")
+    questions = session['queryQuestions']
 
     print(questions)
 
