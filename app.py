@@ -326,7 +326,7 @@ def get_next_question():
     # current_index = data.get('current_index')
     selected_answer = data.get('selected_answer')
     answered_question = data.get('answered_question')
-    handle_grading(answered_question, selected_answer)
+    grade = handle_grading(answered_question, selected_answer)
 
     # query = db.collection('reading_questions').where('difficulty', '==', difficulty).where('skill', '==', skill)
     # query = db.collection('reading_questions').filter('difficulty', '==', difficulty).filter('skill', '==', skill)
@@ -397,7 +397,8 @@ def get_next_question():
         return jsonify({
             'question': question_id,
             'photoType': photo_type,
-            'isFreeResponse': is_free_response
+            'isFreeResponse': is_free_response,
+            'grade': grade
         })
 
 
@@ -452,10 +453,12 @@ def handle_grading(question_id, selected_answer):
         db.collection('accounts').document(uid).update({
             'answeredCorrectly': firestore.ArrayUnion([question_id])
         })
+        return True
     else:
         db.collection('accounts').document(uid).update({
             'answeredIncorrectly': firestore.ArrayUnion([question_id + "_" + selected_answer + "_" + correct_answer])
         })
+        return False
 
 def fetch_image(image_name):
     bucket = storage.bucket()

@@ -4,14 +4,33 @@
         <meta charset="UTF-8">
         <title>Quiz</title>
 
-        <link
-            href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.1/flowbite.min.css"
-            rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.1/flowbite.min.css" rel="stylesheet" />
+
+        <style>
+            @keyframes fadeBlur {
+                0% { opacity: 0; filter: blur(0); }
+                50% { opacity: 0.5; filter: blur(10px); }
+                100% { opacity: 0; filter: blur(0); }
+            }
+            .fade-blur {
+                animation: fadeBlur 1s ease-in-out;
+            }
+            .background-blur {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300%;
+            height: 150%;
+            z-index: -1;
+        }
+        </style>
 
         <script>
         
         document.addEventListener('DOMContentLoaded', (event) => {
             loadNextQuestion();
+            startTimer();
         });
 
         function loadNextQuestion(selectedAnswer = null) {
@@ -32,6 +51,21 @@
                     // alert('No more questions');
                     window.location.href = '/dashboard';
                 } else {
+                    const blurDiv = document.getElementById('background-blur');
+                    const blurEffect = document.getElementById('blur-effect');
+                    if (data.grade === true) {
+                        blurEffect.classList.add('bg-green-500');
+                        blurEffect.classList.remove('bg-red-500');
+                    } else {
+                        blurEffect.classList.add('bg-red-500');
+                        blurEffect.classList.remove('bg-green-500');
+                    }
+                    blurDiv.classList.remove('hidden');
+                    setTimeout(() => {
+                        blurDiv.classList.add('hidden');
+                    }, 1000); // Match the animation duration
+
+
                     console.log("attempting to update question image");
                     // currentQuestionIndex++;
                     console.log(data.question);
@@ -95,15 +129,32 @@
                 window.location.href = '/dashboard';
             });
         }
+
+        function startTimer() {
+            let timer = document.getElementById('timer');
+            let startTime = Date.now();
+            
+            setInterval(() => {
+                let elapsedTime = Date.now() - startTime;
+                let minutes = Math.floor(elapsedTime / 60000);
+                let seconds = Math.floor((elapsedTime % 60000) / 1000);
+                timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
     </script>
     </head>
 
     <header>
         {% include 'nav.html' %}
     </header>
-    <body>
+    <body class="relative">
+        <div id="background-blur" class="hidden fixed inset-0 flex items-center justify-center background-blur">
+        <div id="blur-effect" class="w-full h-full opacity-75 rounded-full fade-blur"></div>
+
+    </div>
         <div class="flex-col">
-            <div id="question-container" class="flex justify-center items-center">
+            <div id="timer" class="text-2xl font-bold my-2 items-center text-center">00:00</div>
+            <div id="question-container" class="flex justify-center items-center relative z-10">
                 <div class="border-gray-400 bg-gray-100 p-4 border rounded-md mx-4">
                     <h1 class="text-lg pb-2">Question ID: <span class="font-semibold" id="questionIDLabel">Loading...</span></h1>
                     <img id="question-image" src alt="Question Image">
@@ -187,6 +238,8 @@
                     onclick="loadNextQuestion(document.getElementById('frq-answer').value)">Submit!</button>
                 
             </div>
+            
+
             <div class="text-center my-3">
                 <button 
                     class="mx-4 rounded-md border px-5 py-3 bg-blue-600 text-white hover:bg-blue-700"
